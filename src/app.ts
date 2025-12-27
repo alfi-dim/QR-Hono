@@ -6,8 +6,8 @@ export const app = new Hono()
 app.route('/health', healthRoutes)
 
 app.get('/', (c) => {
-    return c.json({
-        name: 'QR Secure API',
-        status: 'ok',
-    })
+  return c.json({
+    name: 'QR Secure API',
+    status: 'ok',
+  })
 })

@@ -1,0 +1,29 @@
+FROM node:24.12.0-alpine AS builder
+
+WORKDIR /app
+
+COPY package.json package-lock.json ./
+
+RUN npm ci
+
+COPY . .
+RUN npm run build
+
+# --- Runtime Stage ---
+FROM node:24.12.0-alpine
+
+# Add tini to handle signals (Ctrl+C, SIGTERM) properly as PID 1
+RUN apk add --no-cache tini
+ENTRYPOINT ["/sbin/tini", "--"]
+
+RUN addgroup -S app && adduser -S app -G app
+WORKDIR /app
+ENV NODE_ENV=production
+
+COPY --from=builder --chown=app:app /app/dist ./dist
+COPY --from=builder --chown=app:app /app/node_modules ./node_modules
+COPY --from=builder --chown=app:app /app/package.json ./
+
+USER app
+EXPOSE 3000
+CMD ["node", "--disable-proto=delete", "--no-deprecation", "dist/server.js"]

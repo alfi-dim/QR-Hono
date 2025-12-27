@@ -1,0 +1,26 @@
+services:
+  api:
+    mem_limit: 512m
+    cpus: 0.5
+    container_name: qr-hono-api-prod
+    build:
+      context: .
+      dockerfile: Dockerfile.prod
+    ports:
+      - "127.0.0.1:3000:3000"
+    restart: unless-stopped
+    read_only: true
+    security_opt:
+      - no-new-privileges:true
+    # DROP ALL capabilities to limit kernel access. special thanks for papa gemini :D
+    cap_drop:
+      - ALL
+    tmpfs:
+      - /tmp
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+    env_file:
+      - .env.production
